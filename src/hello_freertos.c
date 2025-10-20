@@ -21,26 +21,34 @@
 #define SUBORDINATE_STACK_SIZE configMINIMAL_STACK_SIZE
 
 SemaphoreHandle_t sem;
+int delay0 = 0;
+int delay1 = 1;
 
 void sub_task(void *params) {
     int delay = *((int*)params);
     if (delay)
         vTaskDelay(delay);
     
-    if (xSemaphoreTake(sem, portMAX_DELAY))
+    if (xSemaphoreTake(sem, 1000))
         printf("Task%d took sem\n", delay);
+    else
+        printf("Task%d failed to take sem\n", delay);
+    
+    while (1)
+        vTaskDelay(100);
 }
 
 void supervisor(__unused void *params) {
     sem = xSemaphoreCreateBinary(); 
+    xSemaphoreGive(sem);
 
-    int delay0 = 0;
     xTaskCreate(sub_task, "Sub0",
                 SUBORDINATE_STACK_SIZE, &delay0, SUBORDINATE_PRIORITY, NULL);
 
-    int delay1 = 1;
     xTaskCreate(sub_task, "Sub1",
                 SUBORDINATE_STACK_SIZE, &delay1, SUBORDINATE_PRIORITY + 1UL, NULL);
+    while (1)
+        vTaskDelay(100);
 }
 
 int main( void )
@@ -48,6 +56,8 @@ int main( void )
     stdio_init_all();
     hard_assert(cyw43_arch_init() == PICO_OK);
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+    sleep_ms(5000);
+    
     printf("Started\n");
     const char *rtos_name;
     rtos_name = "FreeRTOS";
