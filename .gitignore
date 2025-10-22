@@ -6,5 +6,6 @@ log
 *-asciinema
 *.pid
 *-profile
+CMakeLists.txt
 
 .vscode
