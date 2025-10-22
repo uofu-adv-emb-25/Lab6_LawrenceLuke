@@ -39,8 +39,7 @@ void sub_task(void *params) {
 }
 
 void supervisor(__unused void *params) {
-    sem = xSemaphoreCreateBinary(); 
-    xSemaphoreGive(sem);
+    sem = xSemaphoreCreateMutex(); 
 
     xTaskCreate(sub_task, "Sub0",
                 SUBORDINATE_STACK_SIZE, &delay0, SUBORDINATE_PRIORITY, NULL);
